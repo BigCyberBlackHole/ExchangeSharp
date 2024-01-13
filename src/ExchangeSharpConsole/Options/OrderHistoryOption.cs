@@ -6,11 +6,15 @@ using ExchangeSharpConsole.Options.Interfaces;
 namespace ExchangeSharpConsole.Options
 {
 	[Verb("order-history", HelpText = "Prints the orders history from an exchange.")]
-	public class OrderHistoryOption : BaseOption, IOptionPerExchange, IOptionPerMarketSymbol, IOptionWithStartDate
+	public class OrderHistoryOption
+			: BaseOption,
+					IOptionPerExchange,
+					IOptionPerMarketSymbol,
+					IOptionWithStartDate
 	{
 		public override async Task RunCommand()
 		{
-			using var api = GetExchangeInstance(ExchangeName);
+			using var api = await GetExchangeInstanceAsync(ExchangeName);
 
 			Authenticate(api);
 

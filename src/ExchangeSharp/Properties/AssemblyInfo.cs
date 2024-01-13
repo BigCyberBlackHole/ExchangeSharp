@@ -6,7 +6,9 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("ExchangeSharp")]
-[assembly: AssemblyDescription("ExchangeSharp is a C# API for working with various cryptocurrency exchanges. Web sockets are also supported for some exchanges.")]
+[assembly: AssemblyDescription(
+		"ExchangeSharp is a C# API for working with various cryptocurrency exchanges. Web sockets are also supported for some exchanges."
+)]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Digital Ruby, LLC")]
 [assembly: AssemblyProduct("ExchangeSharp")]
@@ -31,6 +33,6 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("0.8.0")]
-[assembly: AssemblyFileVersion("0.8.0")]
+[assembly: AssemblyVersion("1.0.4")]
+[assembly: AssemblyFileVersion("1.0.4")]
 [assembly: InternalsVisibleTo("ExchangeSharpTests")]

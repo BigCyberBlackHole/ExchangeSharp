@@ -6,12 +6,16 @@ using ExchangeSharpConsole.Options.Interfaces;
 namespace ExchangeSharpConsole.Options
 {
 	[Verb("cancel", HelpText = "Cancel an order in a given exchange.")]
-	public class CancelOrderOption : BaseOption,
-		IOptionPerOrderId, IOptionPerExchange, IOptionWithKey, IOptionWithMarketSymbol
+	public class CancelOrderOption
+			: BaseOption,
+					IOptionPerOrderId,
+					IOptionPerExchange,
+					IOptionWithKey,
+					IOptionWithMarketSymbol
 	{
 		public override async Task RunCommand()
 		{
-			using var api = GetExchangeInstance(ExchangeName);
+			using var api = await GetExchangeInstanceAsync(ExchangeName);
 
 			api.LoadAPIKeys(KeyPath);
 

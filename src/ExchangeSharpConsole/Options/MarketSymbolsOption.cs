@@ -5,12 +5,15 @@ using ExchangeSharpConsole.Options.Interfaces;
 
 namespace ExchangeSharpConsole.Options
 {
-	[Verb("market-symbols", HelpText = "Shows all the market symbols (currency pairs) for the selected exchange.")]
+	[Verb(
+			"market-symbols",
+			HelpText = "Shows all the market symbols (currency pairs) for the selected exchange."
+	)]
 	public class MarketSymbolsOption : BaseOption, IOptionPerExchange
 	{
 		public override async Task RunCommand()
 		{
-			using var api = GetExchangeInstance(ExchangeName);
+			using var api = await GetExchangeInstanceAsync(ExchangeName);
 
 			try
 			{

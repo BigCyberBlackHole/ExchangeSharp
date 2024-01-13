@@ -6,15 +6,19 @@ using ExchangeSharpConsole.Options.Interfaces;
 namespace ExchangeSharpConsole.Options
 {
 	[Verb("order-details", HelpText = "Fetch the order details from the exchange.")]
-	public class OrderDetailsOption : BaseOption, IOptionPerExchange, IOptionPerOrderId, IOptionWithMarketSymbol
+	public class OrderDetailsOption
+			: BaseOption,
+					IOptionPerExchange,
+					IOptionPerOrderId,
+					IOptionWithMarketSymbol
 	{
 		public override async Task RunCommand()
 		{
-			using var api = GetExchangeInstance(ExchangeName);
+			using var api = await GetExchangeInstanceAsync(ExchangeName);
 
 			Authenticate(api);
 
-			var orderDetails = await api.GetOrderDetailsAsync(OrderId, MarketSymbol);
+			var orderDetails = await api.GetOrderDetailsAsync(OrderId, marketSymbol: MarketSymbol);
 			Console.WriteLine(orderDetails);
 
 			WaitInteractively();

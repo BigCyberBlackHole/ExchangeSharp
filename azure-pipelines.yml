@@ -2,7 +2,7 @@ trigger:
   batch: false
   branches:
     include:
-    - master
+    - main
   paths:
     exclude:
     - .github/**
@@ -17,7 +17,7 @@ pr:
   autoCancel: true
   branches:
     include:
-    - master
+    - main
   paths:
     exclude:
     - .github/**
@@ -30,11 +30,12 @@ schedules:
   displayName: Monthly release
   branches:
     include:
-    - master
+    - main
 
 variables:
   BuildConfiguration: 'Release'
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
+  PipelineDate: $[format('{0:yyyyMMddHHmmss}', pipeline.startTime)]
 
 jobs:
   - job: build_ci
@@ -42,22 +43,47 @@ jobs:
     timeoutInMinutes: 2
     continueOnError: false
     pool:
-      vmImage: ubuntu-18.04
+      vmImage: ubuntu-latest
     steps:
+      - task: UseDotNet@2
+        displayName: 'Install current .NET Core SDK'
+        inputs:
+          packageType: sdk
+          version: 6.x
+      - task: DotNetCoreCLI@2
+        displayName: 'Restore'
+        inputs:
+          command: 'restore'
+          projects: 'src/ExchangeSharp/ExchangeSharp.csproj'
       - task: DotNetCoreCLI@2
         displayName: 'Build lib+console'
         inputs:
           command: 'build'
-          configuration: $(BuildConfiguration)
-          projects: 'src/ExchangeSharpConsole/ExchangeSharpConsole.csproj'
-      - task: DotNetCoreCLI@2
-        displayName: 'Tests'
+          projects: 'src/ExchangeSharp/ExchangeSharp.csproj'
+          arguments: '--configuration $(BuildConfiguration) --version-suffix prerelease-$(PipelineDate) --output $(Build.ArtifactStagingDirectory)'
+      #- task: DotNetCoreCLI@2
+      #  displayName: 'Tests'
+      #  inputs:
+      #    command: 'test'
+      #    configuration: $(BuildConfiguration)
+      #    projects: 'tests/*/*.csproj'
+      #    publishTestResults: true
+      #    testRunTitle: 'All tests'
+      #- task: DotNetCoreCLI@2
+      #  displayName: 'NuGet Pack'
+      #  inputs:
+      #    command: pack
+      #    packagesToPack: 'src/ExchangeSharp/ExchangeSharp.csproj'
+      #    packDestination: '$(Build.ArtifactStagingDirectory)'
+      #    versioningScheme: off
+      - task: NuGetToolInstaller@1
+      - task: NuGetAuthenticate@0
+        displayName: 'NuGet Authenticate'
+      - task: NuGetCommand@2
+        displayName: 'NuGet push'
         inputs:
-          command: 'test'
-          configuration: $(BuildConfiguration)
-          projects: 'tests/*/*.csproj'
-          publishTestResults: true
-          testRunTitle: 'All tests'
+          command: push
+          publishVstsFeed: DigitalRuby/DigitalRuby
   - job: build_tag
     displayName: Build console app
     timeoutInMinutes: 5
@@ -83,7 +109,7 @@ jobs:
         condition: eq(variables['Agent.OS'], 'Darwin')
         inputs:
           packageType: sdk
-          version: 3.0.100
+          version: 6.x
           installationPath: $(Agent.ToolsDirectory)/dotnet
       - task: DotNetCoreCLI@2
         displayName: "Publish console executable"
@@ -114,7 +140,7 @@ jobs:
     dependsOn: build_tag
     continueOnError: false
     pool:
-      vmImage: ubuntu-18.04
+      vmImage: ubuntu-latest
     condition: or(eq(variables['Build.Reason'], 'Schedule'), startsWith(variables['Build.SourceBranch'], 'refs/tags'))
     steps:
       - bash: echo "##vso[task.setvariable variable=TAG;isOutput=true]$(git describe --tags --exact-match)"

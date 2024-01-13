@@ -5,12 +5,15 @@ using ExchangeSharpConsole.Options.Interfaces;
 
 namespace ExchangeSharpConsole.Options
 {
-	[Verb("market-symbols-metadata", HelpText = "Prints the metadata for all market symbols for the given exchange.")]
+	[Verb(
+			"market-symbols-metadata",
+			HelpText = "Prints the metadata for all market symbols for the given exchange."
+	)]
 	public class MarketSymbolsMetadataOption : BaseOption, IOptionPerExchange
 	{
 		public override async Task RunCommand()
 		{
-			using var api = GetExchangeInstance(ExchangeName);
+			using var api = await GetExchangeInstanceAsync(ExchangeName);
 
 			var marketSymbols = await api.GetMarketSymbolsMetadataAsync();
 

@@ -6,12 +6,20 @@ using ExchangeSharpConsole.Options.Interfaces;
 
 namespace ExchangeSharpConsole.Options
 {
-	[Verb("buy", HelpText = "Adds a buy order to a given exchange.\n" +
-	                        "This sub-command will perform an action that can lead to loss of funds.\n" +
-	                        "Be sure to test it first with a dry-run.")]
-	public class BuyOption : BaseOption,
-		IOptionPerExchange, IOptionWithDryRun,
-		IOptionWithKey, IOptionWithInterval, IOptionWithWait, IOptionWithOrderInfo
+	[Verb(
+			"buy",
+			HelpText = "Adds a buy order to a given exchange.\n"
+					+ "This sub-command will perform an action that can lead to loss of funds.\n"
+					+ "Be sure to test it first with a dry-run."
+	)]
+	public class BuyOption
+			: BaseOption,
+					IOptionPerExchange,
+					IOptionWithDryRun,
+					IOptionWithKey,
+					IOptionWithInterval,
+					IOptionWithWait,
+					IOptionWithOrderInfo
 	{
 		public override async Task RunCommand()
 		{
@@ -20,7 +28,7 @@ namespace ExchangeSharpConsole.Options
 
 		protected async Task AddOrder(bool isBuyOrder)
 		{
-			using var api = GetExchangeInstance(ExchangeName);
+			using var api = await GetExchangeInstanceAsync(ExchangeName);
 
 			var exchangeOrderRequest = GetExchangeOrderRequest(isBuyOrder, api);
 
@@ -35,8 +43,7 @@ namespace ExchangeSharpConsole.Options
 
 			if (Wait)
 			{
-				await WaitForOrder(result, api)
-					.ConfigureAwait(false);
+				await WaitForOrder(result, api).ConfigureAwait(false);
 			}
 			else
 			{
@@ -46,15 +53,17 @@ namespace ExchangeSharpConsole.Options
 
 		private async Task WaitForOrder(ExchangeOrderResult order, IExchangeAPI api)
 		{
-			while (order.Result == ExchangeAPIOrderResult.Pending)
+			while (order.Result == ExchangeAPIOrderResult.Open)
 			{
 				Console.Clear();
 				Console.WriteLine(order);
 
-				await Task.Delay(IntervalMs)
-					.ConfigureAwait(false);
+				await Task.Delay(IntervalMs).ConfigureAwait(false);
 
-				order = await api.GetOrderDetailsAsync(order.OrderId, order.MarketSymbol);
+				order = await api.GetOrderDetailsAsync(
+						order.OrderId,
+						marketSymbol: order.MarketSymbol
+				);
 			}
 
 			Console.Clear();
@@ -83,20 +92,20 @@ namespace ExchangeSharpConsole.Options
 
 		private void DumpResponse(ExchangeOrderResult orderResult)
 		{
-			Console.WriteLine($"Order Id:      {orderResult.OrderId}");
-			Console.WriteLine($"Trade Id:      {orderResult.TradeId}");
-			Console.WriteLine($"Order Date:    {orderResult.OrderDate:R}");
-			Console.WriteLine($"Fill Date:     {orderResult.FillDate:R}");
-			Console.WriteLine($"Type:          {(orderResult.IsBuy ? "Bid" : "Ask")}");
-			Console.WriteLine($"Market symbol: {orderResult.MarketSymbol}");
-			Console.WriteLine($"Status:        {orderResult.Result}");
-			Console.WriteLine($"Price:         {orderResult.Price:N}");
-			Console.WriteLine($"Amount:        {orderResult.Amount:N}");
-			Console.WriteLine($"Amount Filled: {orderResult.AmountFilled:N}");
-			Console.WriteLine($"Fees:          {orderResult.Fees:N}");
-			Console.WriteLine($"Fees currency: {orderResult.FeesCurrency}");
-			Console.WriteLine($"Message:       {orderResult.Message}");
-			Console.WriteLine($"Average Price: {orderResult.AveragePrice:N}");
+			Console.WriteLine($"Order Id:			{orderResult.OrderId}");
+			Console.WriteLine($"Trade Id:			{orderResult.TradeId}");
+			Console.WriteLine($"Order Date:			{orderResult.OrderDate:R}");
+			Console.WriteLine($"Completed Date:     {orderResult.CompletedDate:R}");
+			Console.WriteLine($"Side:				{(orderResult.IsBuy ? "Bid" : "Ask")}");
+			Console.WriteLine($"Market symbol:		{orderResult.MarketSymbol}");
+			Console.WriteLine($"Status:				{orderResult.Result}");
+			Console.WriteLine($"Price:				{orderResult.Price:N}");
+			Console.WriteLine($"Amount:				{orderResult.Amount:N}");
+			Console.WriteLine($"Amount Filled:		{orderResult.AmountFilled:N}");
+			Console.WriteLine($"Fees:				{orderResult.Fees:N}");
+			Console.WriteLine($"Fees currency:		{orderResult.FeesCurrency}");
+			Console.WriteLine($"Message:			{orderResult.Message}");
+			Console.WriteLine($"Average Price:		{orderResult.AveragePrice:N}");
 		}
 
 		private void DumpRequest(ExchangeOrderRequest orderRequest)
